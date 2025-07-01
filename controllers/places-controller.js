@@ -1,7 +1,7 @@
 const HttpError = require("../models/http-error");
 const { v4: uuidv4 } = require("uuid");
 
-const DUMMUY_PLACES = [
+let DUMMUY_PLACES = [
   {
     id: "p1",
     title: "Empire State Building",
@@ -70,7 +70,11 @@ const updatePlace = (req, res, next) => {
   res.status(200).json({ place: updatedPlace });
 };
 
-const deletePlace = (req, res, next) => {};
+const deletePlace = (req, res, next) => {
+  const placeId = req.params.pid.trim();
+  DUMMUY_PLACES = DUMMUY_PLACES.filter((i) => i.id !== placeId);
+  res.status(200).json({ message: "delete place." });
+};
 
 module.exports = {
   getPlacebyId,
