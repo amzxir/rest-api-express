@@ -45,7 +45,7 @@ const login = (req, res, next) => {
     );
   }
 
-  res.json({ message: "logged in ! " }).status(777);
+  res.json({ message: "logged in !" });
 };
 
 module.exports = { getUsers, signup, login };
