@@ -39,7 +39,7 @@ const getPlacesByUserId = (req, res, next) => {
 
   res.json({ places });
 };
-  
+
 const createPlace = (req, res, next) => {
   const err = validationResult(req);
 
@@ -63,6 +63,11 @@ const createPlace = (req, res, next) => {
 };
 
 const updatePlace = (req, res, next) => {
+  const err = validationResult(req);
+  if (!err.isEmpty()) {
+    throw new HttpError("Invalid inputs paseed , please check your data.", 422);
+  }
+
   const { title, description } = req.body;
   const placeId = req.params.pid.trim();
 
@@ -79,6 +84,11 @@ const updatePlace = (req, res, next) => {
 
 const deletePlace = (req, res, next) => {
   const placeId = req.params.pid.trim();
+
+  if (!DUMMUY_PLACES.find((i) => i.id === placeId)) {
+    throw new HttpError("Could not find a place for that id", 404);
+  }
+
   DUMMUY_PLACES = DUMMUY_PLACES.filter((i) => i.id !== placeId);
   res.status(200).json({ message: "delete place." });
 };
