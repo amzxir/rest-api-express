@@ -2,6 +2,7 @@ const HttpError = require("../models/http-error");
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const getCoordsForAddress = require("../utils/location");
+const Place = require("../models/place");
 
 let DUMMUY_PLACES = [
   {
@@ -17,28 +18,49 @@ let DUMMUY_PLACES = [
   },
 ];
 
-const getPlacebyId = (req, res, next) => {
+const getPlacebyId = async (req, res, next) => {
   const pid = req.params.pid;
-  const places = DUMMUY_PLACES.find((i) => i.id === pid);
-
-  if (!places) {
-    throw new HttpError("Could not find a place for the provided id", 404);
+  let place;
+  try {
+    place = await Place.findById(pid);
+  } catch {
+    const err = new HttpError(
+      "Something went wrong , could not find a place",
+      500
+    );
+    return next(err);
   }
 
-  res.json({ places });
+  if (!place) {
+    const err = new HttpError(
+      "Could not find a place for the provided id",
+      404
+    );
+    return next(err);
+  }
+
+  res.json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = (req, res, next) => {
-  const uid = req.params.uid;
-  const places = DUMMUY_PLACES.filter((i) => i.creator === uid);
+const getPlacesByUserId = async (req, res, next) => {
+  const userId = req.params.uid;
 
-  if (!places || places.length === 0) {
-    return next(
-      new HttpError("Could not find a places for the provided user id")
-    );
+  let places;
+  try {
+    places = await Place.find({ creator: userId });
+  } catch {
+    const err = new HttpError("Could not find a places for user id", 500);
+    return next(err);
   }
 
-  res.json({ places });
+  if (!places || places.length === 0) {
+    const err = new HttpError(
+      "Could not find a places for the provided user id"
+    );
+    return next(err);
+  }
+
+  res.json({ places: places.map((i) => i.toObject({ getters: true })) });
 };
 
 const createPlace = async (req, res, next) => {
@@ -53,24 +75,30 @@ const createPlace = async (req, res, next) => {
   try {
     coordinates = await getCoordsForAddress(address);
   } catch (err) {
-    return next(err)
+    return next(err);
   }
 
-  const createPlace = {
-    id: uuidv4(),
-    location: coordinates,
+  const createPlace = new Place({
     title,
-    description,
-    creator,
     address,
-  };
+    creator,
+    description,
+    image:
+      "https://www.brussels.be/sites/default/files/styles/article_image__hd_/public/grand-place-photo_1.jpg?itok=g4nOYCT2",
+    location: coordinates,
+  });
 
-  DUMMUY_PLACES.push(createPlace);
+  try {
+    await createPlace.save();
+  } catch (error) {
+    const err = new HttpError("Create place failed , please try again", 500);
+    return next(err);
+  }
 
   res.status(201).json({ place: createPlace });
 };
 
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const err = validationResult(req);
   if (!err.isEmpty()) {
     throw new HttpError("Invalid inputs paseed , please check your data.", 422);
@@ -79,15 +107,31 @@ const updatePlace = (req, res, next) => {
   const { title, description } = req.body;
   const placeId = req.params.pid.trim();
 
-  const updatedPlace = { ...DUMMUY_PLACES.find((i) => i.id === placeId) };
-  const placeIndex = DUMMUY_PLACES.findIndex((i) => i.id === placeId);
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch {
+    const err = new HttpError(
+      "Something went wrong , could not update place",
+      500
+    );
+    return next(err);
+  }
 
-  updatedPlace.title = title;
-  updatedPlace.description = description;
+  place.title = title;
+  place.description = description;
 
-  DUMMUY_PLACES[placeIndex] = updatedPlace;
+  try {
+    await place.save();
+  } catch {
+    const err = new HttpError(
+      "Something went wrong , could not update place",
+      500
+    );
+    return next(err);
+  }
 
-  res.status(200).json({ place: updatedPlace });
+  res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
 const deletePlace = (req, res, next) => {
