@@ -134,14 +134,19 @@ const updatePlace = async (req, res, next) => {
   res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
-const deletePlace = (req, res, next) => {
+const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid.trim();
 
-  if (!DUMMUY_PLACES.find((i) => i.id === placeId)) {
-    throw new HttpError("Could not find a place for that id", 404);
+  try {
+    await Place.findByIdAndDelete(placeId);
+  } catch {
+    const err = new HttpError(
+      "Something went wrong , could not delete place",
+      500
+    );
+    return next(err);
   }
 
-  DUMMUY_PLACES = DUMMUY_PLACES.filter((i) => i.id !== placeId);
   res.status(200).json({ message: "delete place." });
 };
 
