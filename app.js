@@ -11,12 +11,12 @@ const swaggerSpec = require('./swagger');
 
 const app = express();
 
-app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 app.use(bodyParser.json());
 
 app.use("/api/places", placesRouters);
 app.use("/api/users", usersRouters);
+
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use((req, res, next) => {
   const err = new HttpError("Cloud not find this route.", 404);

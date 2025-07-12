@@ -156,7 +156,6 @@
  *         description: Validation error
  */
 
-
 /**
  * @swagger
  * /api/users/login:
