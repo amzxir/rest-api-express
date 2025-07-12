@@ -3,17 +3,19 @@ const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
-const DUMMY_USERS = [
-  {
-    id: "u1",
-    name: "Amir Ahmadi",
-    email: "test@test.com",
-    password: "test123",
-  },
-];
+const getUsers = async (req, res, next) => {
+  let users;
 
-const getUsers = (req, res, next) => {
-  res.status(200).json({ users: DUMMY_USERS });
+  try {
+    users = await User.find({}, "-password");
+  } catch {
+    const err = new HttpError("fetching data user , plwasw try again", 500);
+    return next(err);
+  }
+
+  res
+    .status(200)
+    .json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
 const signup = async (req, res, next) => {
