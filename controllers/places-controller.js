@@ -4,20 +4,6 @@ const { validationResult } = require("express-validator");
 const getCoordsForAddress = require("../utils/location");
 const Place = require("../models/place");
 
-let DUMMUY_PLACES = [
-  {
-    id: "p1",
-    title: "Empire State Building",
-    description: "An old man would see you in the neighborhood every day. A",
-    location: {
-      lat: 40.7484474,
-      lng: -73.9871516,
-    },
-    address: "with tattered shoes and naked feet playing with plastic balls",
-    creator: "u1",
-  },
-];
-
 const getPlacebyId = async (req, res, next) => {
   const pid = req.params.pid;
   let place;
