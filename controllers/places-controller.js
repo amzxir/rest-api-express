@@ -81,7 +81,7 @@ const createPlace = async (req, res, next) => {
     return next(err);
   }
 
-  res.status(201).json({ place: createPlace });
+  res.status(201).json({ place: createPlace.toObject({ getters: true }) });
 };
 
 const updatePlace = async (req, res, next) => {

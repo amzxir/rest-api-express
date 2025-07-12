@@ -1,6 +1,7 @@
-const HttpError = require("../models/http-error");
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
+const HttpError = require("../models/http-error");
+const User = require("../models/user");
 
 const DUMMY_USERS = [
   {
@@ -15,47 +16,76 @@ const getUsers = (req, res, next) => {
   res.status(200).json({ users: DUMMY_USERS });
 };
 
-const signup = (req, res, next) => {
+const signup = async (req, res, next) => {
   const err = validationResult(req);
-  
+
   if (!err.isEmpty()) {
-    throw new HttpError("Invalid inputs paseed , please check your data", 422);
+    const err = new HttpError(
+      "Invalid inputs paseed , please check your data",
+      422
+    );
+    return next(err);
   }
 
-  const { name, email, password } = req.body;
-  const hasUser = DUMMY_USERS.find((i) => i.email === email);
+  const { name, email, password, places } = req.body;
+
+  let hasUser;
+  try {
+    hasUser = await User.findOne({ email });
+  } catch (error) {
+    const err = new HttpError("Signin up failed , please try again later");
+    return next(err);
+  }
 
   if (hasUser) {
-    throw new HttpError("Could not create user , email alerty exits.", 422);
+    const err = new HttpError(
+      "user exists aleady , please login instead.",
+      422
+    );
+    return next(err);
   }
 
-  const createUSer = {
-    id: uuidv4(),
-    name,
+  const createUSer = new User({
     email,
     password,
-  };
+    name,
+    image: "https://i.sstatic.net/l60Hf.png",
+    places,
+  });
 
-  DUMMY_USERS.push(createUSer);
+  try {
+    await createUSer.save();
+  } catch {
+    const err = new HttpError("Signin up failed , please try again", 500);
+    return next(err);
+  }
 
-  res.status(201).json({ user: createUSer });
+  res.status(201).json({ user: createUSer.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const err = validationResult(req);
 
   if (!err.isEmpty()) {
-    throw new HttpError("Invalid inputs paseed , please check your data", 422);
+    const err = new HttpError(
+      "Invalid inputs paseed , please check your data",
+      422
+    );
+    return next(err);
+  }
+  const { password, email } = req.body;
+
+  let hasUser;
+  try {
+    hasUser = await User.findOne({ email });
+  } catch (error) {
+    const err = new HttpError("loggin in failed , please try again later");
+    return next(err);
   }
 
-  const { password, email } = req.body;
-  const identifiedUSer = DUMMY_USERS.find((i) => i.email === email);
-
-  if (!identifiedUSer || identifiedUSer.password !== password) {
-    throw new HttpError(
-      "Could not indentify user, credentials seem to be wrong.",
-      401
-    );
+  if (!hasUser || hasUser.password !== password) {
+    const err = new HttpError("Invalid credentials could not log you in.", 401);
+    return next(err);
   }
 
   res.json({ message: "logged in !" });
