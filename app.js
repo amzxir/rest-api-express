@@ -1,12 +1,17 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const swaggerUi = require('swagger-ui-express');
+
 
 const placesRouters = require("./routes/places-route");
 const usersRouters = require("./routes/users-routes");
 const HttpError = require("./models/http-error");
+const swaggerSpec = require('./swagger'); 
 
 const app = express();
+
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(bodyParser.json());
 
