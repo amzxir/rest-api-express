@@ -29,7 +29,7 @@ const signup = async (req, res, next) => {
     return next(err);
   }
 
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
 
   let hasUser;
   try {
@@ -52,7 +52,7 @@ const signup = async (req, res, next) => {
     password,
     name,
     image: "https://i.sstatic.net/l60Hf.png",
-    places,
+    places: [],
   });
 
   try {
