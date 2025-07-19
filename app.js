@@ -1,22 +1,31 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const swaggerUi = require('swagger-ui-express');
-
+const swaggerUi = require("swagger-ui-express");
 
 const placesRouters = require("./routes/places-route");
 const usersRouters = require("./routes/users-routes");
 const HttpError = require("./models/http-error");
-const swaggerSpec = require('./swagger'); 
+const swaggerSpec = require("./swagger");
 
 const app = express();
 
 app.use(bodyParser.json());
 
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin , X-Requested-With, Content-Type, Accept , Authorization"
+  );
+
+  res.setHeader("Access-Control-Allow-Methods", "GET , POST,PATCH , DELETE");
+});
+
 app.use("/api/places", placesRouters);
 app.use("/api/users", usersRouters);
 
-app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use((req, res, next) => {
   const err = new HttpError("Cloud not find this route.", 404);
