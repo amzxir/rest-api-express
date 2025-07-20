@@ -20,6 +20,7 @@ app.use((req, res, next) => {
   );
 
   res.setHeader("Access-Control-Allow-Methods", "GET , POST,PATCH , DELETE");
+  next();
 });
 
 app.use("/api/places", placesRouters);
@@ -33,7 +34,7 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  if (res.headerSent) {
+  if (res.headersSent) {
     return next(err);
   }
 
