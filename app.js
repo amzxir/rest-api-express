@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -12,6 +14,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -22,6 +26,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Methods", "GET , POST,PATCH , DELETE");
   next();
 });
+
 
 app.use("/api/places", placesRouters);
 app.use("/api/users", usersRouters);
@@ -34,6 +39,12 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
+
   if (res.headersSent) {
     return next(err);
   }

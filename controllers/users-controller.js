@@ -47,11 +47,13 @@ const signup = async (req, res, next) => {
     return next(err);
   }
 
+  const imagePath = `uploads/images/${req.file.filename}`;
+
   const createUSer = new User({
     email,
     password,
     name,
-    image: "https://i.sstatic.net/l60Hf.png",
+    image: imagePath,
     places: [],
   });
 
