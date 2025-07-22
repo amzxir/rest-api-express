@@ -68,13 +68,14 @@ const createPlace = async (req, res, next) => {
     return next(err);
   }
 
+  const imagePath = `uploads/images/${req.file.filename}`;
+
   const createPlace = new Place({
     title,
     address,
     creator,
     description,
-    image:
-      "https://www.brussels.be/sites/default/files/styles/article_image__hd_/public/grand-place-photo_1.jpg?itok=g4nOYCT2",
+    image: imagePath,
     location: coordinates,
   });
 
