@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
@@ -74,7 +75,21 @@ const signup = async (req, res, next) => {
     return next(err);
   }
 
-  res.status(201).json({ user: createUSer.toObject({ getters: true }) });
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createUSer.id, email: createUSer.email },
+      "supersecret_dont_share",
+      { expiresIn: "2h" }
+    );
+  } catch {
+    const err = new HttpError("SignUp faled , please try again", 500);
+    return next(err);
+  }
+
+  res
+    .status(201)
+    .json({ userId: createUSer.id, email: createUSer.email, token });
 };
 
 const login = async (req, res, next) => {
@@ -119,7 +134,19 @@ const login = async (req, res, next) => {
     return next(err);
   }
 
-  res.json({ message: "logged in !" });
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: hasUser.id, email: hasUser.email },
+      "supersecret_dont_share",
+      { expiresIn: "2h" }
+    );
+  } catch {
+    const err = new HttpError("SignUp faled , please try again", 500);
+    return next(err);
+  }
+
+  res.json({ userId: hasUser.id, email: hasUser.email, token });
 };
 
 module.exports = { getUsers, signup, login };
