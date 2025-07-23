@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
@@ -49,9 +50,18 @@ const signup = async (req, res, next) => {
 
   const imagePath = `uploads/images/${req.file.filename}`;
 
+  let hashPassword;
+
+  try {
+    hashPassword = await bcrypt.hash(password, 12);
+  } catch {
+    const err = new HttpError("Could not create user, please try again", 500);
+    return next(err);
+  }
+
   const createUSer = new User({
     email,
-    password,
+    password: hashPassword,
     name,
     image: imagePath,
     places: [],
@@ -87,7 +97,7 @@ const login = async (req, res, next) => {
     return next(err);
   }
 
-  if (!hasUser || hasUser.password !== password) {
+  if (!hasUser) {
     const err = new HttpError("Invalid credentials could not log you in.", 401);
     return next(err);
   }
