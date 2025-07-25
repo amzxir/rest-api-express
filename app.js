@@ -14,7 +14,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.use('/uploads/images', express.static(path.join('uploads', 'images')));
+app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -26,7 +26,6 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Methods", "GET , POST,PATCH , DELETE");
   next();
 });
-
 
 app.use("/api/places", placesRouters);
 app.use("/api/users", usersRouters);
@@ -56,7 +55,7 @@ app.use((err, req, res, next) => {
 
 mongoose
   .connect(
-    "mongodb+srv://amzxir:3jvgBMPMi8T6Beus@cluster0.h2k0nrd.mongodb.net/places?retryWrites=true&w=majority&appName=Cluster0"
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.h2k0nrd.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`
   )
   .then(() => {
     app.listen(3002);
