@@ -1,4 +1,6 @@
-interface IUser extends Document {
+import { Types } from "mongoose";
+
+export interface IUser extends Document {
   name: string;
   email: string;
   password: string;

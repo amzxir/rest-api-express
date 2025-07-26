@@ -1,7 +1,17 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 
-const userSchema: Schema<IUser> = new Schema({
+// 1. Create an interface representing a document in MongoDB.
+export interface IUser extends Document {
+  name: string;
+  email: string;
+  password: string;
+  image: string;
+  places: mongoose.Types.DocumentArray<mongoose.Types.ObjectId>;
+}
+
+// 2. Create a Schema corresponding to the document interface.
+const UserSchema: Schema<IUser> = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, minlength: 6 },
@@ -9,8 +19,8 @@ const userSchema: Schema<IUser> = new Schema({
   places: [{ type: mongoose.Types.ObjectId, required: true, ref: "Place" }],
 });
 
-userSchema.plugin(uniqueValidator);
+// 3. Apply the uniqueValidator plugin to UserSchema.
+UserSchema.plugin(uniqueValidator);
 
-const User = mongoose.model<IUser>("User", userSchema);
-
-export default User;
+// 4. Create and export the model.
+export default mongoose.model<IUser>("User", UserSchema);

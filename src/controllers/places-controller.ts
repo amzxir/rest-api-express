@@ -4,8 +4,8 @@ import HttpError from "../models/http-error";
 import mongoose from "mongoose";
 import { validationResult } from "express-validator";
 import getCoordsForAddress from "../utils/location";
-import User from "../models/user";
-import Place from "../models/place";
+import User, { IUser } from "../models/user";
+import Place, { IPlace } from "../models/place";
 import { ReqsPlace } from "../types/placeController";
 
 
@@ -56,7 +56,7 @@ const getPlacesByUserId = async (req: Request<{ uid: string }>, res:Response, ne
   }
 
   res.json({
-    places: userWhitPlaces.places.map((i) => i.toObject({ getters: true })),
+    places: userWhitPlaces.places.map((i:any) => i.toObject({ getters: true })),
   });
 };
 
@@ -103,7 +103,7 @@ const createPlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await createPlace.save({ session: sess });
-    user.places.push(createPlace);
+    user.places.push(createPlace._id as mongoose.Types.ObjectId);
     await user.save({ session: sess });
     await sess.commitTransaction();
   } catch {
@@ -165,7 +165,8 @@ const deletePlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
 
   let place;
   try {
-    place = await Place.findById(placeId).populate("creator");
+    place = await Place.findById(placeId).populate("creator") as unknown as IPlace & { creator: IUser };
+
   } catch {
     const err = new HttpError(
       "Something went wrong , could not delete place",
@@ -179,7 +180,7 @@ const deletePlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
     return next(err);
   }
 
-  if (place.creator.id !== req.userData?.userId) {
+  if (place?.creator.id !== req.userData?.userId) {
     const err = new HttpError("You are not allowed to delete this place", 403);
     return next(err);
   }
