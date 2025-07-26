@@ -1,17 +1,17 @@
-const mongoose = require("mongoose");
+import mongoose, { Schema } from "mongoose";
 
-const Schema = mongoose.Schema;
-
-const placeSchema = new Schema({
+const placeSchema: Schema<IPlace> = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   address: { type: String, required: true },
   image: { type: String, required: true },
-  creator: { type: mongoose.Types.ObjectId, required: true , ref:"User" },
+  creator: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
   location: {
     lat: { type: String, required: true },
     lng: { type: String, required: true },
   },
 });
 
-module.exports = mongoose.model("Place", placeSchema);
+const Place = mongoose.model<IPlace>("Place", placeSchema);
+
+export default Place;

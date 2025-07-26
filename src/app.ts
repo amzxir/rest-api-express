@@ -1,16 +1,18 @@
-const fs = require("fs");
-const path = require("path");
-const express = require("express");
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
-const swaggerUi = require("swagger-ui-express");
+import fs from "fs";
+import path from "path";
+import express from "express";
+import bodyParser from "body-parser";
+import mongoose from "mongoose";
+import swaggerUi from "swagger-ui-express";
+import { Request, Response, NextFunction } from "express";
 
-const placesRouters = require("./routes/places-route");
-const usersRouters = require("./routes/users-routes");
-const HttpError = require("./models/http-error");
-const swaggerSpec = require("./swagger");
+import placesRouters from "./routes/places-route";
+import usersRouters from "./routes/users-routes";
+import HttpError from "./models/http-error";
+import swaggerSpec from "./swagger";
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
@@ -37,7 +39,7 @@ app.use((req, res, next) => {
   throw err;
 });
 
-app.use((err, req, res, next) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (req.file) {
     fs.unlink(req.file.path, (err) => {
       console.log(err);
@@ -58,7 +60,7 @@ mongoose
     `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.h2k0nrd.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`
   )
   .then(() => {
-    app.listen(3002);
+    app.listen(PORT);
   })
   .catch((err) => {
     console.log(err);

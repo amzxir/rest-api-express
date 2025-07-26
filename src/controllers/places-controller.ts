@@ -1,13 +1,19 @@
-const fs = require("fs");
-const HttpError = require("../models/http-error");
-const { v4: uuidv4 } = require("uuid");
-const mongoose = require("mongoose");
-const { validationResult } = require("express-validator");
-const getCoordsForAddress = require("../utils/location");
-const Place = require("../models/place");
-const User = require("../models/user");
+import fs from "fs";
+import { Request, Response, NextFunction } from "express";
+import HttpError from "../models/http-error";
+import mongoose from "mongoose";
+import { validationResult } from "express-validator";
+import getCoordsForAddress from "../utils/location";
+import User from "../models/user";
+import Place from "../models/place";
+import { ReqsPlace } from "../types/placeController";
 
-const getPlacebyId = async (req, res, next) => {
+
+const getPlacebyId = async (
+  req: Request<{ pid: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   const pid = req.params.pid;
   let place;
   try {
@@ -31,7 +37,7 @@ const getPlacebyId = async (req, res, next) => {
   res.json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = async (req, res, next) => {
+const getPlacesByUserId = async (req: Request<{ uid: string }>, res:Response, next:NextFunction) => {
   const userId = req.params.uid;
 
   let userWhitPlaces;
@@ -50,11 +56,11 @@ const getPlacesByUserId = async (req, res, next) => {
   }
 
   res.json({
-    places: userWhitPlaces.placesf.map((i) => i.toObject({ getters: true })),
+    places: userWhitPlaces.places.map((i) => i.toObject({ getters: true })),
   });
 };
 
-const createPlace = async (req, res, next) => {
+const createPlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
   const err = validationResult(req);
   if (!err.isEmpty()) {
     next(new HttpError("Invalid inputs paseed , please check your data.", 422));
@@ -69,12 +75,12 @@ const createPlace = async (req, res, next) => {
     return next(err);
   }
 
-  const imagePath = `uploads/images/${req.file.filename}`;
+  const imagePath = `uploads/images/${req.file?.filename}`;
 
   const createPlace = new Place({
     title,
     address,
-    creator: req.userData.userId,
+    creator: req.userData?.userId,
     description,
     image: imagePath,
     location: coordinates,
@@ -82,7 +88,7 @@ const createPlace = async (req, res, next) => {
 
   let user;
   try {
-    user = await User.findById(req.userData.userId);
+    user = await User.findById(req.userData?.userId);
   } catch {
     const err = new HttpError("Created plase failed , please try again.", 500);
     return next(err);
@@ -108,7 +114,7 @@ const createPlace = async (req, res, next) => {
   res.status(201).json({ place: createPlace.toObject({ getters: true }) });
 };
 
-const updatePlace = async (req, res, next) => {
+const updatePlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
   const err = validationResult(req);
   if (!err.isEmpty()) {
     throw new HttpError("Invalid inputs paseed , please check your data.", 422);
@@ -128,7 +134,12 @@ const updatePlace = async (req, res, next) => {
     return next(err);
   }
 
-  if (place.creator.toString() !== req.userData.userId) {
+  if (!place) {
+    const err = new HttpError("Place not found", 404);
+    return next(err);
+  }
+
+  if (place.creator.toString() !== req.userData?.userId) {
     const err = new HttpError("You are not allowed to edit this place", 403);
     return next(err);
   }
@@ -149,7 +160,7 @@ const updatePlace = async (req, res, next) => {
   res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
-const deletePlace = async (req, res, next) => {
+const deletePlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
   const placeId = req.params.pid.trim();
 
   let place;
@@ -163,7 +174,12 @@ const deletePlace = async (req, res, next) => {
     return next(err);
   }
 
-  if (place.creator.id !== req.userData.userId) {
+  if (!place) {
+    const err = new HttpError("Place not found", 404);
+    return next(err);
+  }
+
+  if (place.creator.id !== req.userData?.userId) {
     const err = new HttpError("You are not allowed to delete this place", 403);
     return next(err);
   }
@@ -197,7 +213,7 @@ const deletePlace = async (req, res, next) => {
   res.status(200).json({ message: "delete place." });
 };
 
-module.exports = {
+export {
   getPlacebyId,
   getPlacesByUserId,
   createPlace,

@@ -1,9 +1,9 @@
-const axios = require("axios");
-const HttpError = require("../models/http-error");
+import axios from "axios";
+import HttpError from "../models/http-error";
 
 const API_KEY = process.env.GOOGLE_API_KEY;
 
-async function getCoordsForAddress(address) {
+async function getCoordsForAddress(address: string) {
   const res = await axios.get(
     `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
       address
@@ -24,4 +24,4 @@ async function getCoordsForAddress(address) {
   return coordinates;
 }
 
-module.exports = getCoordsForAddress;
+export default getCoordsForAddress;
