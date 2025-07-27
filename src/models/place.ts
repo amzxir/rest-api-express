@@ -1,20 +1,5 @@
-import mongoose, { Document, Schema } from "mongoose";
-
-// 1. Define an interface for the nested location object
-export interface ILocation {
-  lat: string;
-  lng: string;
-}
-
-// 2. Define an interface representing a Place document
-export interface IPlace extends Document {
-  title: string;
-  description: string;
-  address: string;
-  image: string;
-  creator: mongoose.Types.ObjectId;
-  location: ILocation;
-}
+import mongoose, {  Schema } from "mongoose";
+import { IPlace } from "../types/place";
 
 // 3. Create the schema corresponding to the document interface.
 const PlaceSchema: Schema<IPlace> = new Schema(

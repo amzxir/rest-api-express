@@ -1,14 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
-
-// 1. Create an interface representing a document in MongoDB.
-export interface IUser extends Document {
-  name: string;
-  email: string;
-  password: string;
-  image: string;
-  places: mongoose.Types.DocumentArray<mongoose.Types.ObjectId>;
-}
+import { IUser } from "../types/user";
 
 // 2. Create a Schema corresponding to the document interface.
 const UserSchema: Schema<IUser> = new Schema({

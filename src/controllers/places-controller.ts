@@ -4,10 +4,11 @@ import HttpError from "../models/http-error";
 import mongoose from "mongoose";
 import { validationResult } from "express-validator";
 import getCoordsForAddress from "../utils/location";
-import User, { IUser } from "../models/user";
-import Place, { IPlace } from "../models/place";
+import User from "../models/user";
+import Place from "../models/place";
 import { ReqsPlace } from "../types/placeController";
-
+import { IPlace } from "../types/place";
+import { IUser } from "../types/user";
 
 const getPlacebyId = async (
   req: Request<{ pid: string }>,
@@ -37,7 +38,11 @@ const getPlacebyId = async (
   res.json({ place: place.toObject({ getters: true }) });
 };
 
-const getPlacesByUserId = async (req: Request<{ uid: string }>, res:Response, next:NextFunction) => {
+const getPlacesByUserId = async (
+  req: Request<{ uid: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   const userId = req.params.uid;
 
   let userWhitPlaces;
@@ -56,11 +61,17 @@ const getPlacesByUserId = async (req: Request<{ uid: string }>, res:Response, ne
   }
 
   res.json({
-    places: userWhitPlaces.places.map((i:any) => i.toObject({ getters: true })),
+    places: userWhitPlaces.places.map((i: any) =>
+      i.toObject({ getters: true })
+    ),
   });
 };
 
-const createPlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
+const createPlace = async (
+  req: ReqsPlace,
+  res: Response,
+  next: NextFunction
+) => {
   const err = validationResult(req);
   if (!err.isEmpty()) {
     next(new HttpError("Invalid inputs paseed , please check your data.", 422));
@@ -114,7 +125,11 @@ const createPlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
   res.status(201).json({ place: createPlace.toObject({ getters: true }) });
 };
 
-const updatePlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
+const updatePlace = async (
+  req: ReqsPlace,
+  res: Response,
+  next: NextFunction
+) => {
   const err = validationResult(req);
   if (!err.isEmpty()) {
     throw new HttpError("Invalid inputs paseed , please check your data.", 422);
@@ -160,13 +175,18 @@ const updatePlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
   res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
-const deletePlace = async (req:ReqsPlace, res:Response, next:NextFunction) => {
+const deletePlace = async (
+  req: ReqsPlace,
+  res: Response,
+  next: NextFunction
+) => {
   const placeId = req.params.pid.trim();
 
   let place;
   try {
-    place = await Place.findById(placeId).populate("creator") as unknown as IPlace & { creator: IUser };
-
+    place = (await Place.findById(placeId).populate(
+      "creator"
+    )) as unknown as IPlace & { creator: IUser };
   } catch {
     const err = new HttpError(
       "Something went wrong , could not delete place",
