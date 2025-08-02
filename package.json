@@ -1,13 +1,13 @@
 {
   "name": "rest-api-express",
   "version": "1.0.0",
-  "main": "app.js",
+ "main": "dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
     "build": "tsc",
     "vercel-build": "npm install --legacy-peer-deps && npm run build",
-    "start": "node dist/app.ts"
+   "start": "node dist/app.js"
   },
   "author": "",
   "license": "ISC",
