@@ -1,4 +1,19 @@
 {
+  "version": 2,
   "buildCommand": "npm run vercel-build",
-  "outputDirectory": "."
+  "builds": [
+    {
+      "src": "src/app.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["src/**"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/app.ts"
+    }
+  ]
 }
